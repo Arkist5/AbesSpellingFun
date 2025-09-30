@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script type="text/javascript">
+      // From https://github.com/rafgraph/spa-github-pages
+      (function (l) {
+        var pathSegmentsToKeep = 1;
+        var lPath = l.pathname.split('/').slice(1);
+        var newPathSegments = lPath.slice(pathSegmentsToKeep);
+        if (newPathSegments.length === 0) {
+          newPathSegments = [''];
+        }
+        var newURL =
+          l.protocol +
+          '//' +
+          l.host +
+          '/' +
+          lPath.slice(0, pathSegmentsToKeep).join('/') +
+          '/' +
+          newPathSegments.join('/') +
+          (l.search || '') +
+          l.hash;
+        window.location.replace(newURL);
+      })(window.location);
+    </script>
+  </head>
+  <body></body>
+</html>
