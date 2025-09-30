@@ -10,7 +10,7 @@ type ReplayEvent = CustomEvent<{ gameKey: string }>;
 export class Basketball extends Phaser.Scene {
   private words: ReturnType<typeof getWordsForPlay> = [];
   private index = 0;
-  private input = '';
+  private typed = '';
   private streak = 0;
   private bestStreak = 0;
   private score = 0;
@@ -29,7 +29,7 @@ export class Basketball extends Phaser.Scene {
   create() {
     this.words = [...getWordsForPlay()];
     this.index = 0;
-    this.input = '';
+    this.typed = '';
     this.streak = 0;
     this.bestStreak = 0;
     this.score = 0;
@@ -119,7 +119,7 @@ export class Basketball extends Phaser.Scene {
       this.finishGame();
       return;
     }
-    this.input = '';
+    this.typed = '';
     this.feedbackText.setText('');
     this.promptText.setText(`Word ${this.index + 1}/${this.words.length}`);
     this.playPrompt();
@@ -139,27 +139,27 @@ export class Basketball extends Phaser.Scene {
       return;
     }
     if (event.key === 'Backspace') {
-      this.input = this.input.slice(0, -1);
+      this.typed = this.typed.slice(0, -1);
       this.updateInput();
       return;
     }
     if (!/^[a-zA-Z]$/.test(event.key)) return;
-    this.input += event.key.toLowerCase();
+    this.typed += event.key.toLowerCase();
     this.updateInput();
   }
 
   private updateInput() {
-    if (this.input.length === 0) {
+    if (this.typed.length === 0) {
       this.inputText.setText('');
     } else {
-      this.inputText.setText(this.input.toUpperCase());
+      this.inputText.setText(this.typed.toUpperCase());
     }
   }
 
   private submitWord() {
     const current = this.words[this.index];
     if (!current) return;
-    if (this.input === current.text) {
+    if (this.typed === current.text) {
       this.handleMake();
     } else {
       this.handleMiss();
