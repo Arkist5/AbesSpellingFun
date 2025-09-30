@@ -8,6 +8,7 @@ import { AnimalBoxPage } from './pages/AnimalBoxPage';
 import { BlockBuilderPage } from './pages/BlockBuilderPage';
 import { BasketballPage } from './pages/BasketballPage';
 import { BlockBreakerPage } from './pages/BlockBreakerPage';
+import { GreenLightSquadPage } from './pages/GreenLightSquadPage';
 import './ui/layout.css';
 import './ui/components.css';
 
@@ -18,7 +19,8 @@ const routes: RouteConfig[] = [
   { path: '/games/animal-box', element: <AnimalBoxPage /> },
   { path: '/games/block-builder', element: <BlockBuilderPage /> },
   { path: '/games/basketball', element: <BasketballPage /> },
-  { path: '/games/block-breaker', element: <BlockBreakerPage /> }
+  { path: '/games/block-breaker', element: <BlockBreakerPage /> },
+  { path: '/games/green-light-squad', element: <GreenLightSquadPage /> }
 ];
 
 function App() {

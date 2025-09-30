@@ -8,6 +8,11 @@ const games = [
     description: 'Unlock a parade of cute critters every three words you master.'
   },
   {
+    key: 'green-light-squad',
+    title: 'Green Light Squad',
+    description: 'Clear traffic with each correct letter—trigger green waves for big streaks!'
+  },
+  {
     key: 'block-builder',
     title: 'Block Builder',
     description: 'Stack letter blocks sky-high—unless a rogue block knocks them down!'
