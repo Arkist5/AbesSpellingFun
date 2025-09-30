@@ -2,12 +2,177 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Abe's Spelling Fun</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #ffe0f7 0%, #fef6ff 55%, #ffffff 100%);
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        padding: clamp(1.5rem, 4vw, 3rem);
+        transition: opacity 180ms ease-in-out;
+      }
+
+      #root {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      .static-launcher {
+        width: min(960px, 100%);
+        background: rgba(255, 255, 255, 0.84);
+        backdrop-filter: blur(18px);
+        border-radius: 28px;
+        box-shadow: 0 30px 70px rgba(177, 125, 196, 0.28);
+        padding: clamp(1.5rem, 4vw, 2.75rem);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      .static-launcher__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+
+      .static-launcher__title {
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        margin: 0;
+        color: #4a215b;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+
+      .static-launcher__subtitle {
+        margin: 0;
+        color: rgba(74, 33, 91, 0.8);
+        font-size: clamp(1rem, 2vw, 1.2rem);
+      }
+
+      .static-launcher__grid {
+        display: grid;
+        gap: clamp(1rem, 2vw, 1.5rem);
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .static-launcher__card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+        border-radius: 22px;
+        text-decoration: none;
+        color: inherit;
+        background: linear-gradient(160deg, rgba(255, 191, 250, 0.65), rgba(188, 159, 255, 0.75));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 18px 40px rgba(159, 103, 194, 0.24);
+        position: relative;
+        overflow: hidden;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .static-launcher__card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6), transparent 55%),
+          radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.45), transparent 50%);
+        opacity: 0.75;
+        pointer-events: none;
+      }
+
+      .static-launcher__card:hover,
+      .static-launcher__card:focus-visible {
+        transform: translateY(-6px);
+        box-shadow: 0 22px 44px rgba(123, 76, 164, 0.28);
+        outline: none;
+      }
+
+      .static-launcher__card strong {
+        font-size: 1.25rem;
+        letter-spacing: 0.01em;
+      }
+
+      .static-launcher__card span {
+        font-size: 0.95rem;
+        color: rgba(51, 27, 64, 0.82);
+      }
+
+      .static-launcher__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+      }
+
+      .static-launcher__links a {
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.65rem 1.1rem;
+        border-radius: 999px;
+        background: rgba(74, 33, 91, 0.12);
+        color: #3a1650;
+        transition: background 140ms ease;
+      }
+
+      .static-launcher__links a:hover,
+      .static-launcher__links a:focus-visible {
+        background: rgba(74, 33, 91, 0.2);
+        outline: none;
+      }
+
+      [data-app-loaded='true'] .static-launcher {
+        display: none;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 1rem;
+        }
+      }
+    </style>
   </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+  <body data-app-loaded="false">
+    <div id="root" aria-live="polite"></div>
+    <section class="static-launcher" aria-labelledby="static-launcher-title">
+      <header class="static-launcher__header">
+        <h1 id="static-launcher-title" class="static-launcher__title">Abe's Spelling Fun</h1>
+        <p class="static-launcher__subtitle">Pick a game to start practicing spelling and phonics.</p>
+      </header>
+      <div class="static-launcher__grid">
+        <a class="static-launcher__card" href="./games/animal-box/">
+          <strong>Animal Box</strong>
+          <span>Match animals with their sounds and build vocabulary.</span>
+        </a>
+        <a class="static-launcher__card" href="./games/block-builder/">
+          <strong>Block Builder</strong>
+          <span>Construct words brick-by-brick to reinforce letter order.</span>
+        </a>
+        <a class="static-launcher__card" href="./games/basketball/">
+          <strong>Basketball</strong>
+          <span>Shoot hoops by spelling each challenge word correctly.</span>
+        </a>
+        <a class="static-launcher__card" href="./games/block-breaker/">
+          <strong>Block Breaker</strong>
+          <span>Coming soon! Sharpen reflexes while spelling on the fly.</span>
+        </a>
+      </div>
+      <nav class="static-launcher__links" aria-label="Quick links">
+        <a href="./">Home</a>
+        <a href="./games/">All games</a>
+        <a href="./settings/">Settings</a>
+      </nav>
+    </section>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

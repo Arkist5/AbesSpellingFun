@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Router, RouteConfig } from './router';
 import { HomePage } from './pages/HomePage';
@@ -21,8 +21,23 @@ const routes: RouteConfig[] = [
   { path: '/games/block-breaker', element: <BlockBreakerPage /> }
 ];
 
+function App() {
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.dataset.appLoaded = 'true';
+    }
+    return () => {
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.dataset.appLoaded = 'false';
+      }
+    };
+  }, []);
+
+  return <Router routes={routes} />;
+}
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Router routes={routes} />
+    <App />
   </React.StrictMode>
 );
