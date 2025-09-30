@@ -22,11 +22,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
+          cache: 'npm'   # optional; works best once you commit package-lock.json
+      - run: npm install --no-audit --no-fund
       - run: npm run build
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: ./dist
+          path: ./dist    # Vite's default build output
 
   deploy:
     environment:
