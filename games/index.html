@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Games | Abe's Spelling Fun</title>
+    <link rel="stylesheet" href="../static-page.css" />
+    <style>
+      .grid {
+        display: grid;
+        gap: clamp(1rem, 2.2vw, 1.5rem);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      .card {
+        text-decoration: none;
+        background: linear-gradient(160deg, rgba(255, 191, 250, 0.6), rgba(188, 159, 255, 0.7));
+        border-radius: 22px;
+        padding: 1.25rem;
+        color: rgba(51, 27, 64, 0.88);
+        font-weight: 600;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 18px 40px rgba(159, 103, 194, 0.22);
+        transition: transform 160ms ease, box-shadow 160ms ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .card:hover,
+      .card:focus-visible {
+        transform: translateY(-4px);
+        box-shadow: 0 22px 46px rgba(123, 76, 164, 0.26);
+        outline: none;
+      }
+
+      .card strong {
+        font-size: 1.2rem;
+        color: #3a1650;
+      }
+
+      .card span {
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Explore Every Game</h1>
+        <p>Select a prototype below to learn more about each activity in the Abe's Spelling Fun collection.</p>
+      </header>
+
+      <div class="grid">
+        <a class="card" href="./animal-box/">
+          <strong>Animal Box</strong>
+          <span>Match animals with their sounds to strengthen phonemic awareness.</span>
+        </a>
+        <a class="card" href="./block-builder/">
+          <strong>Block Builder</strong>
+          <span>Arrange letter blocks into complete words and patterns.</span>
+        </a>
+        <a class="card" href="./basketball/">
+          <strong>Basketball Spelling</strong>
+          <span>Score points by typing each target word correctly.</span>
+        </a>
+        <a class="card" href="./block-breaker/">
+          <strong>Block Breaker</strong>
+          <span>Coming soon! Fast-paced spelling practice in an arcade format.</span>
+        </a>
+      </div>
+
+      <a class="button" href="../index.html">Back to home</a>
+    </main>
+  </body>
+</html>

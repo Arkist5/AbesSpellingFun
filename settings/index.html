@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings | Abe's Spelling Fun</title>
+    <link rel="stylesheet" href="../static-page.css" />
+    <style>
+      form {
+        display: grid;
+        gap: 1.1rem;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        text-align: left;
+        font-weight: 600;
+        color: #3a1650;
+      }
+
+      input,
+      select {
+        border: 1px solid rgba(74, 33, 91, 0.25);
+        border-radius: 12px;
+        padding: 0.65rem 0.85rem;
+        font-size: 1rem;
+        font-family: inherit;
+      }
+
+      small {
+        font-weight: 400;
+        font-size: 0.85rem;
+        color: rgba(74, 33, 91, 0.7);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Settings Preview</h1>
+        <p>Customize how Abe's Spelling Fun will look and sound once the full application ships.</p>
+      </header>
+
+      <section>
+        <p>
+          These controls are a visual mock-up. They demonstrate the options families and teachers will have in
+          the upcoming release, including sound, difficulty, and accessibility preferences.
+        </p>
+      </section>
+
+      <form>
+        <label>
+          Display name
+          <input type="text" placeholder="Player name" disabled value="Abe" />
+          <small>Profiles will keep track of achievements and favorite games.</small>
+        </label>
+
+        <label>
+          Skill focus
+          <select disabled>
+            <option>Letter sounds</option>
+            <option>Spelling patterns</option>
+            <option>Vocabulary</option>
+          </select>
+          <small>Choose which skills to prioritize in daily practice.</small>
+        </label>
+
+        <label>
+          Audio volume
+          <input type="range" min="0" max="100" value="70" disabled />
+          <small>Adjust narration and sound effects for your environment.</small>
+        </label>
+      </form>
+
+      <a class="button" href="../index.html">Back to home</a>
+    </main>
+  </body>
+</html>
