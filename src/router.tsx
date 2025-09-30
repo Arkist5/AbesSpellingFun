@@ -29,8 +29,7 @@ function matchRoute(path: string, routes: RouteConfig[]): ReactNode | null {
 const baseFromEnv =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
 
-const basePath =
-  baseFromEnv === '/' ? '' : baseFromEnv.replace(/\/$/, '');
+const baseHrefPrefix = baseFromEnv === '/' ? '' : baseFromEnv;
 
 function normalizeRelative(path: string): string {
   if (!path) return '/';
@@ -39,27 +38,20 @@ function normalizeRelative(path: string): string {
   return prefixed.replace(/\/+$/, '');
 }
 
-function stripBase(pathname: string): string {
-  const normalized = pathname || '/';
-  if (!basePath) {
-    return normalizeRelative(normalized);
-  }
-  if (normalized === basePath || `${normalized}/` === `${basePath}/`) {
-    return '/';
-  }
-  if (normalized.startsWith(`${basePath}/`)) {
-    return normalizeRelative(normalized.slice(basePath.length));
-  }
-  return normalizeRelative(normalized);
+function hashToPath(hash: string): string {
+  if (!hash || hash === '#') return '/';
+  return normalizeRelative(hash.replace(/^#/, ''));
 }
 
-function withBase(path: string): string {
+function pathToHash(path: string): string {
   const normalized = normalizeRelative(path);
-  if (!basePath) return normalized;
-  if (normalized === '/') {
-    return `${basePath}/`;
-  }
-  return `${basePath}${normalized}`;
+  if (normalized === '/') return '#/';
+  return `#${normalized}`;
+}
+
+function hrefWithBase(hash: string): string {
+  if (!baseHrefPrefix) return hash;
+  return `${baseHrefPrefix}${hash}`;
 }
 
 function resolveRelativePath(current: string, target: string): string {
@@ -71,20 +63,26 @@ function resolveRelativePath(current: string, target: string): string {
   return normalizeRelative(`${base}/${target}`);
 }
 
+function currentPathFromHash(): string {
+  return hashToPath(window.location.hash);
+}
+
 export function Router({ routes }: { routes: RouteConfig[] }) {
-  const [path, setPath] = useState(() => stripBase(window.location.pathname || '/'));
+  const [path, setPath] = useState(() => currentPathFromHash());
 
   useEffect(() => {
-    const handler = () => setPath(stripBase(window.location.pathname || '/'));
-    window.addEventListener('popstate', handler);
-    return () => window.removeEventListener('popstate', handler);
+    const handler = () => setPath(currentPathFromHash());
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
   }, []);
 
   const navigate = useCallback(
     (nextPath: string) => {
       const resolved = resolveRelativePath(path, nextPath);
       if (resolved === path) return;
-      window.history.pushState({}, '', withBase(resolved));
+      const targetHash = pathToHash(resolved);
+      if (window.location.hash === targetHash) return;
+      window.location.hash = targetHash;
       setPath(resolved);
     },
     [path]
@@ -122,8 +120,9 @@ export function Link({ to, children, className }: LinkProps) {
     const resolved = resolveRelativePath(currentPath, to);
     navigate(resolved);
   };
+  const targetHash = pathToHash(resolveRelativePath(currentPath, to));
   return (
-    <a href={withBase(resolveRelativePath(currentPath, to))} onClick={handleClick} className={className}>
+    <a href={hrefWithBase(targetHash)} onClick={handleClick} className={className}>
       {children}
     </a>
   );
