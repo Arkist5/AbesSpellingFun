@@ -26,28 +26,66 @@ function matchRoute(path: string, routes: RouteConfig[]): ReactNode | null {
   return route?.element ?? null;
 }
 
-function resolvePath(href: string): string {
-  if (!href.startsWith('/')) {
-    const base = window.location.pathname.replace(/\/$/, '');
-    return `${base}/${href}`;
+const baseFromEnv =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
+
+const basePath =
+  baseFromEnv === '/' ? '' : baseFromEnv.replace(/\/$/, '');
+
+function normalizeRelative(path: string): string {
+  if (!path) return '/';
+  const prefixed = path.startsWith('/') ? path : `/${path}`;
+  if (prefixed === '/') return '/';
+  return prefixed.replace(/\/+$/, '');
+}
+
+function stripBase(pathname: string): string {
+  const normalized = pathname || '/';
+  if (!basePath) {
+    return normalizeRelative(normalized);
   }
-  return href;
+  if (normalized === basePath || `${normalized}/` === `${basePath}/`) {
+    return '/';
+  }
+  if (normalized.startsWith(`${basePath}/`)) {
+    return normalizeRelative(normalized.slice(basePath.length));
+  }
+  return normalizeRelative(normalized);
+}
+
+function withBase(path: string): string {
+  const normalized = normalizeRelative(path);
+  if (!basePath) return normalized;
+  if (normalized === '/') {
+    return `${basePath}/`;
+  }
+  return `${basePath}${normalized}`;
+}
+
+function resolveRelativePath(current: string, target: string): string {
+  if (!target) return normalizeRelative(current);
+  if (target.startsWith('/')) {
+    return normalizeRelative(target);
+  }
+  const base = current === '/' ? '' : current.replace(/\/[^\/]*$/, '');
+  return normalizeRelative(`${base}/${target}`);
 }
 
 export function Router({ routes }: { routes: RouteConfig[] }) {
-  const [path, setPath] = useState(() => window.location.pathname || '/');
+  const [path, setPath] = useState(() => stripBase(window.location.pathname || '/'));
 
   useEffect(() => {
-    const handler = () => setPath(window.location.pathname || '/');
+    const handler = () => setPath(stripBase(window.location.pathname || '/'));
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
   }, []);
 
   const navigate = useCallback(
     (nextPath: string) => {
-      if (nextPath === path) return;
-      window.history.pushState({}, '', nextPath);
-      setPath(nextPath);
+      const resolved = resolveRelativePath(path, nextPath);
+      if (resolved === path) return;
+      window.history.pushState({}, '', withBase(resolved));
+      setPath(resolved);
     },
     [path]
   );
@@ -78,13 +116,14 @@ type LinkProps = {
 
 export function Link({ to, children, className }: LinkProps) {
   const navigate = useNavigate();
+  const currentPath = usePathname();
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    const resolved = resolvePath(to);
+    const resolved = resolveRelativePath(currentPath, to);
     navigate(resolved);
   };
   return (
-    <a href={to} onClick={handleClick} className={className}>
+    <a href={withBase(resolveRelativePath(currentPath, to))} onClick={handleClick} className={className}>
       {children}
     </a>
   );
