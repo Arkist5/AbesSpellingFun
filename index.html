@@ -1,13 +1,227 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Abe's Spelling Fun</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        const root = document.documentElement;
+        root.classList.remove('no-js');
+        root.classList.add('has-js');
+        const updateRouteAttr = () => {
+          root.setAttribute('data-route', window.location.pathname || '/');
+        };
+        const wrapHistory = (method) => {
+          const original = history[method];
+          history[method] = function (...args) {
+            const result = original.apply(this, args);
+            updateRouteAttr();
+            return result;
+          };
+        };
+        updateRouteAttr();
+        wrapHistory('pushState');
+        wrapHistory('replaceState');
+        window.addEventListener('popstate', updateRouteAttr);
+      })();
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Nunito', 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at top, #ffe3ec, #f8f9ff);
+        color: #1b1b2f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+        gap: clamp(1.5rem, 4vw, 2.5rem);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .Landing {
+        width: min(960px, 100%);
+        margin: 0 auto;
+        padding: clamp(2rem, 6vw, 3rem);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 25px 60px rgba(31, 41, 55, 0.18);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1.5rem, 4vw, 2.5rem);
+      }
+
+      .has-js:not([data-route="/"]) .Landing {
+        display: none;
+      }
+
+      .Landing__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+      }
+
+      .Landing__title {
+        margin: 0;
+        font-size: clamp(2.5rem, 6vw, 3.5rem);
+        font-weight: 700;
+        color: #0f3057;
+      }
+
+      .Landing__subtitle {
+        margin: 0;
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+        color: #374151;
+      }
+
+      .Landing__grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      }
+
+      .Landing__card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 1.5rem 1.75rem;
+        text-decoration: none;
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.75));
+        box-shadow: 0 18px 35px rgba(15, 48, 87, 0.18);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+      }
+
+      .Landing__card:hover,
+      .Landing__card:focus-visible {
+        transform: translateY(-6px);
+        box-shadow: 0 25px 45px rgba(15, 48, 87, 0.22);
+        outline: none;
+      }
+
+      .Landing__card[data-disabled="true"] {
+        pointer-events: none;
+        opacity: 0.55;
+        box-shadow: none;
+      }
+
+      .Landing__icon {
+        font-size: 2rem;
+      }
+
+      .Landing__card strong {
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+
+      .Landing__card small {
+        font-size: 0.95rem;
+        color: #4b5563;
+        line-height: 1.35;
+      }
+
+      .Landing__footer {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+      }
+
+      .Landing__link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: 999px;
+        background: rgba(15, 48, 87, 0.1);
+        font-weight: 600;
+      }
+
+      #root {
+        flex: 1;
+        display: flex;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 1.25rem;
+          gap: 1.25rem;
+        }
+
+        .Landing {
+          padding: 1.75rem;
+          border-radius: 24px;
+        }
+      }
+    </style>
   </head>
   <body>
+    <main class="Landing" aria-labelledby="landing-title">
+      <header class="Landing__header">
+        <h1 id="landing-title" class="Landing__title">Abe's Spelling Fun</h1>
+        <p class="Landing__subtitle">
+          Pick a game below to jump right into play-testing, or hop into the full app experience.
+        </p>
+      </header>
+      <section class="Landing__grid" aria-label="Game selection">
+        <a class="Landing__card" href="/games/animal-box">
+          <span class="Landing__icon" aria-hidden="true">🦊</span>
+          <strong>Animal Box</strong>
+          <small>Crack the mystery crates by spelling three words correctly to meet a new critter.</small>
+        </a>
+        <a class="Landing__card" href="/games/block-builder">
+          <span class="Landing__icon" aria-hidden="true">🧱</span>
+          <strong>Block Builder</strong>
+          <small>Stack letter blocks to the sky—miss too many letters and the tower tumbles.</small>
+        </a>
+        <a class="Landing__card" href="/games/basketball">
+          <span class="Landing__icon" aria-hidden="true">🏀</span>
+          <strong>Basketball</strong>
+          <small>Shoot your shot by spelling each prompt before the buzzer for a perfect streak.</small>
+        </a>
+        <span class="Landing__card" data-disabled="true">
+          <span class="Landing__icon" aria-hidden="true">🧩</span>
+          <strong>Block Breaker</strong>
+          <small>Coming soon! A phonics meets Peggle mash-up is in the works.</small>
+        </span>
+      </section>
+      <div class="Landing__footer">
+        <a class="Landing__link" href="/games">🎮 View all games</a>
+        <a class="Landing__link" href="/">🏠 Manage word lists</a>
+        <a class="Landing__link" href="/settings">⚙️ Settings</a>
+      </div>
+    </main>
     <div id="root"></div>
+    <noscript>
+      <p style="max-width: 720px; margin: 0 auto; font-weight: 600; text-align: center;">
+        This app needs JavaScript to load the interactive games. Enable JavaScript to start playing.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
