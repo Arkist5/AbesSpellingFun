@@ -20,7 +20,6 @@ export default class PreloadScene extends Phaser.Scene {
     });
     this.load.on('complete', () => g.destroy());
 
-    // (We’ll add real assets in the next task)
   }
 
   create() {
