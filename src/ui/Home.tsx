@@ -67,7 +67,26 @@ export function Home() {
   };
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          justifyContent: 'center'
+        }}
+      >
+        <div style={{ flex: '1 1 160px', minWidth: '160px' }}>
+          <Link to="/math" className="BigButton-link">
+            🧮 Math
+          </Link>
+        </div>
+        <div style={{ flex: '1 1 160px', minWidth: '160px' }}>
+          <Link to="/spelling" className="BigButton-link">
+            🔤 Spelling
+          </Link>
+        </div>
+      </div>
       <form className="Home-grid" onSubmit={handleSubmit}>
         <Card
           title="Your words"
@@ -108,9 +127,6 @@ export function Home() {
           <BigButton type="button" onClick={() => handleComingSoon('Speed Round')}>
             ⚡ Speed Round
           </BigButton>
-          <Link to="/games" className="BigButton-link">
-            🎮 Play Games
-          </Link>
         </div>
       </form>
       {toasts.map((toast) => (

@@ -2,19 +2,24 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Router, RouteConfig } from './router';
 import { HomePage } from './pages/HomePage';
-import { GameSelectPage } from './pages/GameSelectPage';
 import { SettingsPage } from './pages/SettingsPage';
 import AnimalBoxGame from './games/animal-box';
 import { BlockBuilderPage } from './pages/BlockBuilderPage';
 import { BasketballPage } from './pages/BasketballPage';
 import { BlockBreakerPage } from './pages/BlockBreakerPage';
 import { GreenLightSquadPage } from './pages/GreenLightSquadPage';
+import { SpellingPage } from './pages/SpellingPage';
+import { MathPage } from './pages/MathPage';
+import { FlashCardsPlaceholder } from './pages/FlashCardsPlaceholder';
 import './ui/layout.css';
 import './ui/components.css';
 
 const routes: RouteConfig[] = [
   { path: '/', element: <HomePage /> },
-  { path: '/games', element: <GameSelectPage /> },
+  { path: '/spelling', element: <SpellingPage /> },
+  { path: '/math', element: <MathPage /> },
+  { path: '/math/flash-cards', element: <FlashCardsPlaceholder /> },
+  { path: '/games', element: <SpellingPage /> },
   { path: '/settings', element: <SettingsPage /> },
   { path: '/games/animal-box', element: <AnimalBoxGame /> },
   { path: '/games/block-builder', element: <BlockBuilderPage /> },
