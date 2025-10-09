@@ -29,19 +29,46 @@
     .attempts .dead{opacity:.25;filter:grayscale(100%)}
     /* ------- NEW: vertical flashcard layout ------- */
     .equation{display:flex;justify-content:center;margin:18px 0 8px}
+    /* Vertical flashcard alignment */
     .vcard{
       background:var(--card); border:2px solid rgba(0,0,0,.35); border-radius:8px;
       padding:16px 18px; width:clamp(180px,48vw,260px);
       box-shadow:0 6px 18px rgba(0,0,0,.25) inset, var(--shadow);
-      font-variant-numeric:tabular-nums;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
     }
-    .vrow{display:flex;align-items:center;justify-content:center;line-height:1.1;margin:6px 0}
-    .vrow .num{font-weight:800}
-    .vrow.top .num{font-size:clamp(36px,6vw,52px)}
-    .vrow.bottom .sign{font-size:clamp(22px,4vw,28px);margin-right:10px;opacity:.9}
-    .vrow.bottom .num{font-size:clamp(36px,6vw,52px)}
-    .vrule{height:4px;margin:8px 0 6px;background:rgba(255,255,255,.12);border-radius:2px}
-    .vrow.answer .num{font-size:clamp(32px,5vw,44px);opacity:.85}
+
+    .vrow {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      line-height: 1.1;
+      margin: 6px 0;
+    }
+
+    .vrow .sign {
+      display: inline-block;
+      width: 1.2ch;
+      text-align: left;
+      margin-right: 0.4ch;
+      opacity: .9;
+      font-size: clamp(22px, 4vw, 28px);
+    }
+
+    .vrow .num {
+      display: inline-block;
+      min-width: 2.2ch;
+      text-align: right;
+      font-weight: 800;
+    }
+
+    .vrow.top .num,
+    .vrow.bottom .num {
+      font-size: clamp(36px, 6vw, 52px);
+    }
+
+    .vrule { height: 4px; margin: 8px 0 6px; background: rgba(255,255,255,.12); border-radius: 2px; }
+    .vrow.answer .num { font-size: clamp(32px, 5vw, 44px); text-align: center; min-width: 0; opacity: .85; }
     /* -------------------------------------------- */
     .subtext{text-align:center;color:var(--muted);margin:0 0 14px;font-size:15px}
     .choices{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
@@ -88,8 +115,14 @@
           <!-- NEW: vertical addition card -->
           <div class="equation" id="equation" aria-label="addition problem">
             <div class="vcard" role="img" aria-label="vertical addition">
-              <div class="vrow top"><span class="num" id="opA">10</span></div>
-              <div class="vrow bottom"><span class="sign">+</span><span class="num" id="opB">1</span></div>
+              <div class="vrow top">
+                <span class="sign" aria-hidden="true"></span>
+                <span class="num" id="opA">10</span>
+              </div>
+              <div class="vrow bottom">
+                <span class="sign" id="opSign">+</span>
+                <span class="num" id="opB">1</span>
+              </div>
               <div class="vrule"></div>
               <div class="vrow answer"><span class="num" id="opAns">?</span></div>
             </div>
