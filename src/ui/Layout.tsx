@@ -24,7 +24,8 @@ export function Layout({ children }: LayoutProps) {
         <h1>Abe's Spelling Fun</h1>
         <nav>
           <Link to="/">Home</Link>
-          <Link to="/games">Games</Link>
+          <Link to="/spelling">Spelling</Link>
+          <Link to="/math">Math</Link>
           <Link to="/settings">Settings</Link>
         </nav>
         {listName && <span className="AppShell-list">Current list: {listName}</span>}
