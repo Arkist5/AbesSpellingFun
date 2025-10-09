@@ -243,7 +243,8 @@
 
   // ========= TTS (SpeechSynthesis) =========
   const tts = (() => {
-    let enabled = true;
+    // Default OFF; load saved preference if present
+    let enabled = (localStorage.getItem('ttsEnabled') === 'true') ? true : false;
     let voice = null;
 
     const has = () => ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
@@ -293,6 +294,7 @@
 
     function toggle(){
       enabled = !enabled;
+      try { localStorage.setItem('ttsEnabled', String(enabled)); } catch(_) {}
       if (!enabled && has()) speechSynthesis.cancel();
       updateUI();
     }
