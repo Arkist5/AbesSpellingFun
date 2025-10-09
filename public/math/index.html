@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Ava's Flashcard Game (Addition)</title>
+  <title>Ava's Flashcard Game — Addition</title>
   <meta name="description" content="iPad-first addition flashcards 1+1 through 10+10 with multiple-choice and type-in modes, sounds, and confetti.">
   <style>
     :root {
@@ -27,7 +27,21 @@
     .pill{background:#0b0e15;border-radius:999px;padding:8px 12px;font-size:14px;color:var(--muted)}
     .attempts{display:inline-flex;gap:6px;align-items:center;font-size:22px}
     .attempts .dead{opacity:.25;filter:grayscale(100%)}
-    .equation{text-align:center;font-size:clamp(36px,7vw,56px);font-weight:800;letter-spacing:1px;margin:18px 0 8px}
+    /* ------- NEW: vertical flashcard layout ------- */
+    .equation{display:flex;justify-content:center;margin:18px 0 8px}
+    .vcard{
+      background:var(--card); border:2px solid rgba(0,0,0,.35); border-radius:8px;
+      padding:16px 18px; width:clamp(180px,48vw,260px);
+      box-shadow:0 6px 18px rgba(0,0,0,.25) inset, var(--shadow);
+    }
+    .vrow{display:flex;align-items:center;justify-content:flex-end;line-height:1.1;margin:6px 0}
+    .vrow .num{font-weight:800}
+    .vrow.top .num{font-size:clamp(36px,6vw,52px)}
+    .vrow.bottom .sign{font-size:clamp(22px,4vw,28px);margin-right:10px;opacity:.9}
+    .vrow.bottom .num{font-size:clamp(36px,6vw,52px)}
+    .vrule{height:4px;margin:8px 0 6px;background:rgba(255,255,255,.12);border-radius:2px}
+    .vrow.answer .num{font-size:clamp(32px,5vw,44px);opacity:.85}
+    /* -------------------------------------------- */
     .subtext{text-align:center;color:var(--muted);margin:0 0 14px;font-size:15px}
     .choices{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
     .btn{appearance:none;border:0;border-radius:12px;min-height:var(--tap);padding:12px 14px;font-size:clamp(18px,4vw,22px);font-weight:700;background:#0b0e15;color:var(--fg);box-shadow:var(--shadow);cursor:pointer;transition:transform .04s ease,box-shadow .2s ease,background .2s ease;touch-action:manipulation}
@@ -39,10 +53,14 @@
     .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
     .key{min-height:56px;font-size:20px;font-weight:700;border-radius:12px;border:0;background:var(--card);color:var(--fg);box-shadow:var(--shadow)}
     .feedback{min-height:28px;text-align:center;margin-top:10px;font-size:16px;color:var(--muted)}
-    .bar{height:10px;background:#0b0e15;border-radius:999px;overflow:hidden;margin:6px 0 0}.bar span{display:block;height:100%;background:var(--accent);width:0%;transition:width .3s ease}
+    .bar{height:10px;background:#0b0e15;border-radius:999px;overflow:hidden;margin:6px 0 0}
+    .bar span{display:block;height:100%;background:var(--accent);width:0%;transition:width .3s ease}
     footer{padding:12px 18px 18px;display:flex;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.06)}
-    .center{text-align:center}.hidden{display:none !important}
-    .win{padding:36px 16px 28px;text-align:center}.win h2{font-size:clamp(24px,6vw,36px);margin:0 0 8px}.win p{color:var(--muted);margin:0 0 18px}.tiny{font-size:12px;color:var(--muted)}
+    .hidden{display:none !important}
+    .win{padding:36px 16px 28px;text-align:center}
+    .win h2{font-size:clamp(24px,6vw,36px);margin:0 0 8px}
+    .win p{color:var(--muted);margin:0 0 18px}
+    .tiny{font-size:12px;color:var(--muted)}
     /* Confetti overlay */
     #confetti{position:absolute;inset:0;pointer-events:none}
   </style>
@@ -66,7 +84,15 @@
         <div class="bar" aria-hidden="true"><span id="progressBar"></span></div>
 
         <div id="cardArea">
-          <div class="equation" id="equation">1 + 1 = ?</div>
+          <!-- NEW: vertical addition card -->
+          <div class="equation" id="equation" aria-label="addition problem">
+            <div class="vcard" role="img" aria-label="vertical addition">
+              <div class="vrow top"><span class="num" id="opA">10</span></div>
+              <div class="vrow bottom"><span class="sign">+</span><span class="num" id="opB">1</span></div>
+              <div class="vrule"></div>
+              <div class="vrow answer"><span class="num" id="opAns">?</span></div>
+            </div>
+          </div>
           <p class="subtext">Three tries for each card. Right answers leave the deck. Missed ones come back soon.</p>
 
           <!-- Multiple choice -->
@@ -128,62 +154,42 @@
     if (audioCtx.state === 'suspended') audioCtx.resume();
   }
   window.addEventListener('pointerdown', ensureAudio, {once:true});
-
   function tone(freq, dur, type, gain) {
     if (!audioCtx) return;
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-    o.type = type || 'sine';
-    o.frequency.value = freq || 440;
-    g.gain.value = gain || 0.03;
-    o.connect(g); g.connect(audioCtx.destination);
-    const t = audioCtx.currentTime;
-    g.gain.setValueAtTime(g.gain.value, t);
+    o.type = type || 'sine'; o.frequency.value = freq || 440;
+    g.gain.value = gain || 0.03; o.connect(g); g.connect(audioCtx.destination);
+    const t = audioCtx.currentTime; g.gain.setValueAtTime(g.gain.value, t);
     g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.15));
     o.start(t); o.stop(t + (dur || 0.15));
   }
   const sfx = {
     press(){ ensureAudio(); tone(650, 0.05, 'triangle', 0.02); },
-    correct(){
-      ensureAudio();
-      tone(660, 0.10, 'sine', 0.03);
-      setTimeout(()=>tone(880, 0.12, 'sine', 0.03), 110);
-    },
-    wrong(){
-      ensureAudio();
-      tone(180, 0.18, 'sawtooth', 0.025);
-      setTimeout(()=>tone(140, 0.20, 'sawtooth', 0.02), 120);
-    }
+    correct(){ ensureAudio(); tone(660, 0.10, 'sine', 0.03); setTimeout(()=>tone(880, 0.12, 'sine', 0.03), 110); },
+    wrong(){ ensureAudio(); tone(180, 0.18, 'sawtooth', 0.025); setTimeout(()=>tone(140, 0.20, 'sawtooth', 0.02), 120); }
   };
 
   // ========= Confetti (tiny canvas burst) =========
   const confetti = (() => {
     const canvas = document.getElementById('confetti');
-    const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, raf = 0, parts = [];
-
+    const ctx = canvas.getContext('2d'); let W = 0, H = 0, raf = 0, parts = [];
     function resize(){ W = canvas.width = canvas.clientWidth; H = canvas.height = canvas.clientHeight; }
     new ResizeObserver(resize).observe(canvas);
-
     function burst(n, big){
       for (let i=0;i<n;i++){
-        parts.push({
-          x: W/2, y: H*0.25, vx: (Math.random()*2-1)*(big?6:4),
+        parts.push({ x: W/2, y: H*0.25, vx: (Math.random()*2-1)*(big?6:4),
           vy: (Math.random()*-2-2)*(big?2.2:1.6), g: 0.12, w: 6, h: 10,
           r: Math.random()*Math.PI, vr: (Math.random()*0.2-0.1),
-          color: `hsl(${Math.floor(Math.random()*360)},85%,60%)`, life: 90 + Math.random()*60
-        });
+          color: `hsl(${Math.floor(Math.random()*360)},85%,60%)`, life: 90 + Math.random()*60 });
       }
       if (!raf) loop();
     }
     function loop(){
-      raf = requestAnimationFrame(loop);
-      ctx.clearRect(0,0,W,H);
+      raf = requestAnimationFrame(loop); ctx.clearRect(0,0,W,H);
       for (let i=parts.length-1;i>=0;i--){
-        const p = parts[i];
-        p.vy += p.g; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--;
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
-        ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+        const p = parts[i]; p.vy += p.g; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
         if (p.y>H+20 || p.life<=0) parts.splice(i,1);
       }
       if (parts.length===0){ cancelAnimationFrame(raf); raf = 0; }
@@ -198,19 +204,13 @@
     const $$ = (s) => Array.from(document.querySelectorAll(s));
     const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
     const shuffle = (a)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
-
     function buildDeck(max=10){
-      const out = [];
-      for(let a=1;a<=max;a++){
-        for(let b=1;b<=max;b++){
-          out.push({a:a,b:b,answer:a+b,id:a+"+"+b,attemptsLeft:3,seen:0,misses:0});
-        }
-      }
+      const out = []; for(let a=1;a<=max;a++){ for(let b=1;b<=max;b++){
+        out.push({a:a,b:b,answer:a+b,id:a+"+"+b,attemptsLeft:3,seen:0,misses:0}); }}
       return shuffle(out);
     }
     function makeMCOptions(correct){
-      const set = new Set([correct]);
-      const candidates = [];
+      const set = new Set([correct]); const candidates = [];
       for(let d=-3; d<=3; d++){ if(d!==0) candidates.push(correct + d); }
       shuffle(candidates);
       while(set.size<4 && candidates.length){ const c=candidates.shift(); if(c>=2 && c<=20) set.add(c); }
@@ -225,8 +225,7 @@
 
     let deck = buildDeck(10), discard = [], current = null;
     let mode = 'mc', options = [], locked = false;
-
-    const progressText = $('#progressText'), progressBar = $('#progressBar'), equation = $('#equation');
+    const progressText = $('#progressText'), progressBar = $('#progressBar');
     const attemptsEl = $('#attempts'), feedback = $('#feedback'), mcPanel = $('#mcPanel'), typePanel = $('#typePanel');
     const answerInput = $('#answerInput'), checkBtn = $('#checkBtn'), clearBtn = $('#clearBtn'), resetBtn = $('#resetBtn'), skipBtn = $('#skipBtn');
     const win = $('#win'), cardArea = $('#cardArea'), playAgain = $('#playAgain'), modeMC = $('#mode-mc'), modeType = $('#mode-type');
@@ -246,7 +245,10 @@
     function setFeedback(msg){ feedback.textContent = msg || ''; }
 
     function showCard(card){
-      equation.textContent = card.a + " + " + card.b + " = ?";
+      // NEW: fill the vertical layout instead of a single "a + b = ?" line
+      document.getElementById('opA').textContent = String(card.a);
+      document.getElementById('opB').textContent = String(card.b);
+      document.getElementById('opAns').textContent = "?";
       renderAttempts(card.attemptsLeft); setFeedback('');
       if(mode==='mc'){
         options = makeMCOptions(card.answer);
@@ -260,18 +262,14 @@
       if(!deck.length){ cardArea.classList.add('hidden'); win.classList.remove('hidden'); updateProgress(); confetti.burst(240,true); return; }
       current = deck.shift(); current.attemptsLeft = 3; current.seen++; showCard(current); updateProgress();
     }
-
     function handleCorrect(){
-      if(!current) return;
-      setFeedback("Nice! \u2714"); sfx.correct(); confetti.burst(80,false);
+      if(!current) return; setFeedback("Nice! \u2714"); sfx.correct(); confetti.burst(80,false);
       if(mode==='mc'){ $$('.opt').forEach(btn=>{ if(+btn.textContent===current.answer) btn.classList.add('correct'); btn.disabled = true; }); }
       else { checkBtn.disabled = true; }
-      locked = true;
-      setTimeout(()=>{ discard.push(current); current=null; locked=false; nextCard(); }, 700);
+      locked = true; setTimeout(()=>{ discard.push(current); current=null; locked=false; nextCard(); }, 700);
     }
     function handleWrong(){
-      if(!current) return;
-      current.attemptsLeft--; sfx.wrong();
+      if(!current) return; current.attemptsLeft--; sfx.wrong();
       setFeedback("Try again - " + current.attemptsLeft + " " + (current.attemptsLeft===1 ? "try" : "tries") + " left."); renderAttempts(current.attemptsLeft);
       if(current.attemptsLeft<=0){
         const retry = current; setFeedback("We'll circle back to " + retry.a + " + " + retry.b + ".");
@@ -289,10 +287,10 @@
       });
     });
 
-    answerInput.addEventListener('input', ()=>{ answerInput.value = answerInput.value.replace(/\D/g,'').slice(0,2); checkBtn.disabled = (answerInput.value===''); });
+    answerInput.addEventListener('input', ()=>{ answerInput.value = answerInput.value.replace(/\D/g,'').slice(0,2); /* Optional: show live in stack -> document.getElementById('opAns').textContent = answerInput.value || "?"; */ checkBtn.disabled = (answerInput.value===''); });
     answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); if(!checkBtn.disabled) checkBtn.click(); } });
     checkBtn.addEventListener('click', ()=>{ sfx.press(); if(locked || !current) return; const val = Number(answerInput.value); if(val===current.answer) handleCorrect(); else { typePanel.animate([{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:180}); handleWrong(); }});
-    clearBtn.addEventListener('click', ()=>{ sfx.press(); answerInput.value=''; checkBtn.disabled=true; setFeedback(''); answerInput.focus({preventScroll:true}); });
+    clearBtn.addEventListener('click', ()=>{ sfx.press(); answerInput.value=''; checkBtn.disabled=true; setFeedback(''); answerInput.focus({preventScroll:true}); document.getElementById('opAns').textContent = "?"; });
 
     $$('.key').forEach(k=>{
       k.addEventListener('click', ()=>{
@@ -302,12 +300,13 @@
         if(key==='bksp'){ answerInput.value = answerInput.value.slice(0,-1); }
         else if(key==='enter'){ if(!checkBtn.disabled) checkBtn.click(); return; }
         else{ if(answerInput.value.length<2) answerInput.value += key; }
-        checkBtn.disabled = (answerInput.value===''); answerInput.focus({preventScroll:true});
+        checkBtn.disabled = (answerInput.value===''); /* Optional live: document.getElementById('opAns').textContent = answerInput.value || "?"; */
+        answerInput.focus({preventScroll:true});
       });
     });
 
     skipBtn.addEventListener('click', ()=>{ sfx.press(); if(!current || locked) return; const retry = current; setFeedback("Okay - we'll come back to " + retry.a + " + " + retry.b + "."); locked = true; setTimeout(()=>{ retry.attemptsLeft=3; requeueNearFront(retry,3); current=null; locked=false; nextCard(); }, 500); });
-    function resetDeck(){ deck = buildDeck(10); discard = []; current = null; cardArea.classList.remove('hidden'); win.classList.add('hidden'); updateProgress(); nextCard(); }
+    function resetDeck(){ deck = buildDeck(10); discard = []; current = null; cardArea.classList.remove('hidden'); win.classList.add('hidden'); updateProgress(); nextCard(); document.getElementById('opAns').textContent = "?"; }
     resetBtn.addEventListener('click', ()=>{ sfx.press(); resetDeck(); }); playAgain.addEventListener('click', ()=>{ sfx.press(); resetDeck(); });
 
     function setMode(newMode){ if(mode===newMode) return; mode=newMode;
