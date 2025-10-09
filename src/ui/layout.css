@@ -162,3 +162,9 @@ body {
   width: 100% !important;
   height: auto !important;
 }
+
+/* Highlight the active nav item (set via aria-current="page" on <Link>) */
+.AppShell-header nav a[aria-current="page"] {
+  background: #ffffff;
+  outline: 2px solid rgba(74, 20, 140, 0.35); /* subtle ring */
+}

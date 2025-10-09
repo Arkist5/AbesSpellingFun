@@ -77,12 +77,12 @@ export function Home() {
         }}
       >
         <div style={{ flex: '1 1 160px', minWidth: '160px' }}>
-          <Link to="/math" className="BigButton-link">
+          <Link to="/math" className="BigButton-link" ariaLabel="Go to Math games">
             🧮 Math
           </Link>
         </div>
         <div style={{ flex: '1 1 160px', minWidth: '160px' }}>
-          <Link to="/spelling" className="BigButton-link">
+          <Link to="/spelling" className="BigButton-link" ariaLabel="Go to Spelling games">
             🔤 Spelling
           </Link>
         </div>
