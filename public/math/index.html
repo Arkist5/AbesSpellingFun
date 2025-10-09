@@ -24,7 +24,16 @@
     .mode-toggle button[aria-pressed="true"]{background:var(--card);box-shadow:var(--shadow);color:var(--fg)}
     main{padding:clamp(16px,2.5vw,24px)}
     .status{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-    .pill{background:#0b0e15;border-radius:999px;padding:8px 12px;font-size:14px;color:var(--muted)}
+    .pill {
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: var(--muted);
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
     .attempts{display:inline-flex;gap:6px;align-items:center;font-size:22px}
     .attempts .dead{opacity:.25;filter:grayscale(100%)}
     /* ------- NEW: vertical flashcard layout ------- */
@@ -107,6 +116,7 @@
       <main>
         <div class="status">
           <div class="pill" id="progressText">Solved 0 / 100</div>
+          <button id="voiceToggle" class="pill" role="switch" aria-checked="true" style="cursor:pointer">Voice: On</button>
           <div class="attempts" aria-label="Attempts left" id="attempts"><span></span><span></span><span></span></div>
         </div>
         <div class="bar" aria-hidden="true"><span id="progressBar"></span></div>
@@ -187,7 +197,7 @@
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
   }
-  window.addEventListener('pointerdown', ensureAudio, {once:true});
+  window.addEventListener('pointerdown', () => { ensureAudio(); tts.init(); }, {once:true});
   function tone(freq, dur, type, gain) {
     if (!audioCtx) return;
     const o = audioCtx.createOscillator();
@@ -231,6 +241,82 @@
     return { burst };
   })();
 
+  // ========= TTS (SpeechSynthesis) =========
+  const tts = (() => {
+    let enabled = true;
+    let voice = null;
+
+    const has = () => ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+
+    function pickVoice(){
+      const voices = speechSynthesis.getVoices();
+      if (!voices || !voices.length) return null;
+      // Prefer English, and a friendly/child/female voice if one exists.
+      const en = voices.filter(v => /^en(-|_)/i.test(v.lang));
+      const preferred =
+        en.find(v => /child|kids|samantha|karen|moira|victoria|allison|ava|olivia|female/i.test(v.name)) ||
+        en[0] || voices[0];
+      return preferred || null;
+    }
+
+    function init(){
+      if (!has()) { updateUIUnavailable(); return; }
+      if (!voice) {
+        voice = pickVoice();
+        if (!voice) {
+          speechSynthesis.onvoiceschanged = () => { voice = pickVoice(); };
+        }
+      }
+      updateUI();
+    }
+
+    function speak(text, opts = {}){
+      const cb = typeof opts.onend === 'function' ? opts.onend : null;
+      if (!enabled || !has()) { if (cb) cb(); return; }
+      const u = new SpeechSynthesisUtterance(text);
+      if (voice) u.voice = voice;
+      u.rate = (opts.rate ?? 0.95);
+      u.pitch = (opts.pitch ?? 1.05);
+      u.volume = (opts.volume ?? 1.0);
+      u.onend = () => { if (cb) cb(); };
+      speechSynthesis.speak(u);
+    }
+
+    function start(a, b){
+      if (has()) speechSynthesis.cancel();          // stop any previous speech
+      speak(a + " plus " + b + " equals");
+    }
+
+    function result(a, b, ans, done){
+      speak(a + " plus " + b + " equals " + ans, { onend: done });
+    }
+
+    function toggle(){
+      enabled = !enabled;
+      if (!enabled && has()) speechSynthesis.cancel();
+      updateUI();
+    }
+
+    function updateUI(){
+      const el = document.getElementById('voiceToggle');
+      if (el) {
+        el.textContent = enabled ? "Voice: On" : "Voice: Off";
+        el.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      }
+    }
+
+    function updateUIUnavailable(){
+      const el = document.getElementById('voiceToggle');
+      if (el) {
+        el.textContent = "Voice: Unavailable";
+        el.disabled = true;
+        el.style.opacity = 0.6;
+      }
+    }
+
+    return { init, start, result, toggle, updateUI };
+  })();
+
   // ========= Game Logic =========
   (function(){
     'use strict';
@@ -260,9 +346,17 @@
     let deck = buildDeck(10), discard = [], current = null;
     let mode = 'mc', options = [], locked = false;
     const progressText = $('#progressText'), progressBar = $('#progressBar');
+    const voiceToggle = $('#voiceToggle');
     const attemptsEl = $('#attempts'), feedback = $('#feedback'), mcPanel = $('#mcPanel'), typePanel = $('#typePanel');
     const answerInput = $('#answerInput'), checkBtn = $('#checkBtn'), clearBtn = $('#clearBtn'), resetBtn = $('#resetBtn'), skipBtn = $('#skipBtn');
     const win = $('#win'), cardArea = $('#cardArea'), playAgain = $('#playAgain'), modeMC = $('#mode-mc'), modeType = $('#mode-type');
+
+    if (voiceToggle) {
+      voiceToggle.addEventListener('click', () => {
+        sfx.press();
+        tts.toggle();
+      });
+    }
 
     function updateProgress(){
       const solved = discard.length;
@@ -291,6 +385,7 @@
       }else{
         answerInput.value=''; checkBtn.disabled=true; mcPanel.classList.add('hidden'); typePanel.classList.remove('hidden'); answerInput.focus({preventScroll:true});
       }
+      tts.start(card.a, card.b);
     }
     function nextCard(){
       if(!deck.length){ cardArea.classList.add('hidden'); win.classList.remove('hidden'); updateProgress(); confetti.burst(240,true); return; }
@@ -300,7 +395,18 @@
       if(!current) return; setFeedback("Nice! \u2714"); sfx.correct(); confetti.burst(80,false);
       if(mode==='mc'){ $$('.opt').forEach(btn=>{ if(+btn.textContent===current.answer) btn.classList.add('correct'); btn.disabled = true; }); }
       else { checkBtn.disabled = true; }
-      locked = true; setTimeout(()=>{ discard.push(current); current=null; locked=false; nextCard(); }, 700);
+      locked = true;
+
+      // Speak the full equation + correct answer, then advance.
+      tts.result(current.a, current.b, current.answer, () => {
+        // short breath after TTS ends
+        setTimeout(() => {
+          discard.push(current);
+          current = null;
+          locked = false;
+          nextCard();
+        }, 100);
+      });
     }
     function handleWrong(){
       if(!current) return; current.attemptsLeft--; sfx.wrong();
@@ -356,6 +462,7 @@
 
     // Boot
     updateProgress(); resetDeck();
+    tts.init();
   })();
   </script>
 </body>
