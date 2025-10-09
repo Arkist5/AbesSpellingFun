@@ -110,19 +110,31 @@ type LinkProps = {
   to: string;
   children: ReactNode;
   className?: string;
+  /** Optional accessible label for screen readers */
+  ariaLabel?: string;
 };
 
-export function Link({ to, children, className }: LinkProps) {
+export function Link({ to, children, className, ariaLabel }: LinkProps) {
   const navigate = useNavigate();
   const currentPath = usePathname();
+
+  const resolved = resolveRelativePath(currentPath, to);
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    const resolved = resolveRelativePath(currentPath, to);
     navigate(resolved);
   };
-  const targetHash = pathToHash(resolveRelativePath(currentPath, to));
+
+  const targetHash = pathToHash(resolved);
+  const isActive = resolved === currentPath;
+
   return (
-    <a href={hrefWithBase(targetHash)} onClick={handleClick} className={className}>
+    <a
+      href={hrefWithBase(targetHash)}
+      onClick={handleClick}
+      className={className}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={ariaLabel}
+    >
       {children}
     </a>
   );
