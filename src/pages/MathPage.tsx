@@ -29,9 +29,9 @@ export function MathPage() {
         </header>
         <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
           <NavTile
-            to="/math/flash-cards"
+            to="/math/flash-cards-addition"
             title="Flash Cards"
-            description={<p style={{ margin: 0 }}>Practice with quick math flash cards (coming soon)</p>}
+            description={<p style={{ margin: 0 }}>Practice with quick math flash cards.</p>}
           />
         </div>
       </div>
