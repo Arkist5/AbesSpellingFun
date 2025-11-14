@@ -21,7 +21,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="AppShell">
       <header className="AppShell-header">
-        <h1>Abe's Spelling Fun</h1>
+        <h1>Ava's Spelling Fun</h1>
         <nav>
           <Link to="/">Home</Link>
           <Link to="/spelling">Spelling</Link>

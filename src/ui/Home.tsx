@@ -18,6 +18,8 @@ type ToastMessage = {
   text: string;
 };
 
+// NOTE: This component represented the previous landing page UI before Task 1.
+//       RootHomePage now replaces it, but we keep the implementation for future reuse.
 export function Home() {
   const [listName, setListName] = useState('');
   const [wordsText, setWordsText] = useState('');

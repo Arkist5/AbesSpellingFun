@@ -1,4 +1,4 @@
-# Abe's Spelling & Math Fun – Development Plan
+# Ava's Spelling & Math Fun – Development Plan
 
 ## 0. High-Level Goals
 
@@ -138,7 +138,7 @@ We want a simple, centered “two big tiles” layout that works especially well
      return (
        <main className="root-home">
          <header className="root-home__header">
-           <h1>Abe's Spelling & Math Fun</h1>
+          <h1>Ava's Spelling & Math Fun</h1>
            <p>What do you want to play today?</p>
          </header>
 
