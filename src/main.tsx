@@ -1,20 +1,20 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Router, RouteConfig } from './router';
-import { HomePage } from './pages/HomePage';
+import { RootHomePage } from './pages/RootHomePage';
 import { SettingsPage } from './pages/SettingsPage';
-import { SpellingPage } from './pages/SpellingPage';
-import { MathPage } from './pages/MathPage';
+import { SpellingHomePage } from './pages/SpellingHomePage';
+import { MathHomePage } from './pages/MathHomePage';
 import MathFlashCardsAddition from './pages/MathFlashCardsAddition';
 import './ui/layout.css';
 import './ui/components.css';
 
 const routes: RouteConfig[] = [
-  { path: '/', element: <HomePage /> },
-  { path: '/spelling', element: <SpellingPage /> },
-  { path: '/math', element: <MathPage /> },
+  // NOTE: Root home page (Spelling vs Math) is rendered from <RootHomePage /> via this route.
+  { path: '/', element: <RootHomePage /> },
+  { path: '/spelling', element: <SpellingHomePage /> },
+  { path: '/math', element: <MathHomePage /> },
   { path: '/math/flash-cards-addition', element: <MathFlashCardsAddition /> },
-  { path: '/games', element: <SpellingPage /> },
   { path: '/settings', element: <SettingsPage /> }
 ];
 
