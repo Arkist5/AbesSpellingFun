@@ -281,3 +281,304 @@ By the end of Task 1, we should have:
   - Root Home → Spelling Home (stub)
   - Root Home → Math Home (stub)
 - All old spelling game start buttons removed from the landing page, so they’re effectively “gone” from Ava’s view until we rebuild them.
+
+
+---
+
+## 3. Task 2 – Math Home Page & Flashcards Entry
+
+> **Goal:** Create a simple, iPad-friendly Math home page that currently shows exactly one big option — “Flashcards” — and routes into the existing math flashcards game, while wiring navigation cleanly from the new Root Home Page (Task 1).
+
+This task is about making the **Math side** feel like a real area of the app, even though it only has one game for now.
+
+### 3.1. Task 2 – Implementation Steps for Codex
+
+> Assumption: The math flashcards game already exists somewhere in `/src` (possibly as a page, route, or component). Adapt file names to the actual code.
+
+---
+
+### Step 1: Locate the existing Math flashcards implementation
+
+1. Search the repo for likely names:
+   - Keywords: `flashcard`, `Flashcards`, `MathFlashcards`, `mathFlashcards`, `math-flashcards`, `FlashcardsPage`, etc.
+   - Also check under:
+     - `/src/pages`
+     - `/src/ui`
+     - `/src/games`
+   - Identify:
+     - The **main component** that renders the flashcards UI.
+     - The **current way it is started** (e.g., router path, button, or direct render).
+
+2. Once found, add a short comment near the main flashcards component definition documenting its role, e.g.:
+
+   ```ts
+   // NOTE: This component is the main Math Flashcards game.
+   // It is launched from MathHomePage (Task 2) and should remain math-only.
+   ```
+
+3. If there are multiple variants:
+   - Prefer the one that is currently wired up and working in the live UI.
+   - If unclear, pick the simplest one and leave a comment for future refactors.
+
+---
+
+### Step 2: Define the MathHomePage component (structure & props)
+
+We want a **dedicated “Math home page”** that can be reached from the Root Home Page.
+
+1. Create a new page component if one does not already exist, e.g. `src/pages/MathHomePage.tsx`:
+   - Props:
+     - `onBack: () => void` — navigates back to the Root Home Page.
+     - `onStartFlashcards: () => void` — starts the math flashcards game.
+
+2. Basic JSX structure (adapt to project style):
+
+   ```tsx
+   export function MathHomePage(props: {
+     onBack: () => void;
+     onStartFlashcards: () => void;
+   }) {
+     return (
+       <main className="math-home">
+         <header className="math-home__header">
+           <button
+             type="button"
+             className="math-home__back"
+             onClick={props.onBack}
+           >
+             ← Main Menu
+           </button>
+           <h1 className="math-home__title">Math Fun</h1>
+           <p className="math-home__subtitle">
+             Practice your math facts with flashcards.
+           </p>
+         </header>
+
+         <section className="math-home__content">
+           <button
+             type="button"
+             className="math-home__tile math-home__tile--flashcards"
+             onClick={props.onStartFlashcards}
+           >
+             <div className="math-home__tile-label">Flashcards</div>
+             <div className="math-home__tile-subtitle">
+               Quick practice for addition, subtraction, and more.
+             </div>
+           </button>
+         </section>
+       </main>
+     );
+   }
+   ```
+
+3. If the project already uses shared layout components (e.g. `Layout`, `Card`, `BigButton` in `/src/ui/Components.tsx`):
+   - Prefer to build the MathHomePage using those components instead of raw HTML elements.
+   - For example, wrap content in `<Layout>` or use a `<BigButton>` component for the tile body.
+
+---
+
+### Step 3: Wire MathHomePage into the navigation (App/router)
+
+We need the navigation from Task 1 to actually show this Math home page.
+
+1. In the same place where Task 1 introduced the `screen` state (or the router routes):
+   - Ensure the `mathHome` case renders the new `MathHomePage` component.
+   - Example with screen state (from Task 1):
+
+     ```ts
+     type Screen = 'rootHome' | 'spellingHome' | 'mathHome' | 'mathFlashcards';
+
+     const App = () => {
+       const [screen, setScreen] = useState<Screen>('rootHome');
+
+       const goToRoot = () => setScreen('rootHome');
+       const goToSpellingHome = () => setScreen('spellingHome');
+       const goToMathHome = () => setScreen('mathHome');
+       const goToMathFlashcards = () => setScreen('mathFlashcards');
+
+       return (
+         <>
+           {screen === 'rootHome' && (
+             <RootHomePage
+               onChooseSpelling={goToSpellingHome}
+               onChooseMath={goToMathHome}
+             />
+           )}
+
+           {screen === 'mathHome' && (
+             <MathHomePage
+               onBack={goToRoot}
+               onStartFlashcards={goToMathFlashcards}
+             />
+           )}
+
+           {/* SpellingHomePage and other screens omitted for brevity */}
+         </>
+       );
+     };
+     ```
+
+2. If using a router (e.g. a custom `router.ts` or a library):
+   - Add a route for `/math` that renders `MathHomePage`.
+   - Add a route for `/math/flashcards` (see Step 4 below) that renders the flashcards game.
+   - Update the Root Home Page math option to navigate to `/math`.
+
+3. Make sure the **only** navigation from Root to Math is via this `MathHomePage` (no direct “Flashcards” link from Root).
+
+---
+
+### Step 4: Wire the Flashcards tile to the existing math flashcards game
+
+We want the Flashcards tile on MathHomePage to start the existing game cleanly.
+
+1. Decide on how to represent the flashcards game in navigation:
+
+   - Option A – Screen state:
+     - Add a `screen === 'mathFlashcards'` case in the main App component.
+     - In that case, render the Math flashcards component.
+   - Option B – Router path:
+     - Add a `/math/flashcards` path that renders the math flashcards game.
+
+2. Implement the `onStartFlashcards` callback for MathHomePage accordingly:
+
+   - For **screen state**:
+     ```ts
+     const goToMathFlashcards = () => setScreen('mathFlashcards');
+     ```
+   - For **router path**:
+     ```ts
+     const goToMathFlashcards = () => router.navigate('/math/flashcards');
+     ```
+
+3. In the math flashcards component/page:
+   - Ensure it does not assume it is the “root” page anymore.
+   - If needed, wrap it in a dedicated page component, e.g. `MathFlashcardsPage`, that can show a header and back button (see Step 5).
+
+4. If there are any **previous buttons or links** that started the flashcards game directly from other places (e.g. root, old menus):
+   - Remove or comment them out so the canonical entry point is now **MathHomePage → Flashcards**.
+   - Leave a short comment indicating they were superseded by Task 2.
+
+---
+
+### Step 5: Add a clear “Back to Math Home” path from the flashcards game
+
+We need Ava to be able to leave flashcards and return to the Math home page easily.
+
+1. Wrap the existing flashcards game in a simple page/container that includes:
+
+   - A back button at the top:
+     ```tsx
+     export function MathFlashcardsPage(props: { onBackToMath: () => void }) {
+       return (
+         <main className="math-flashcards-page">
+           <header className="math-flashcards-page__header">
+             <button
+               type="button"
+               className="math-flashcards-page__back"
+               onClick={props.onBackToMath}
+             >
+               ← Math Home
+             </button>
+             <h1>Math Flashcards</h1>
+           </header>
+
+           <section className="math-flashcards-page__content">
+             <MathFlashcardsGame /> {/* existing game component */}
+           </section>
+         </main>
+       );
+     }
+     ```
+
+2. Wire the `onBackToMath` callback to navigation:
+
+   - For screen state:
+     ```ts
+     {screen === 'mathFlashcards' && (
+       <MathFlashcardsPage onBackToMath={goToMathHome} />
+     )}
+     ```
+   - For router:
+     - Use the router’s navigation API to go back to `/math`.
+
+3. If the flashcards game already has its own navigation bar or title:
+   - Either:
+     - Integrate the back button into the existing top bar, or
+     - Replace the existing title bar with the new header, keeping the game unchanged.
+
+4. Confirm that the flashcards game **does not show any spelling-related nav**; it should feel like a pure math experience.
+
+---
+
+### Step 6: Style the Math Home page (iPad-first)
+
+We want MathHomePage to visually align with the RootHomePage while having its own personality.
+
+1. Add CSS/SCSS for the math home page, e.g. `src/styles/math-home.css` or reuse an existing stylesheet:
+
+   - `.math-home`:
+     - Similar base layout to `.root-home`: centered content, max width ≈ 900px, `margin: 0 auto; padding: 24px;`.
+     - Flex column, with gap between header and the main tile section.
+
+   - `.math-home__header`:
+     - Align back button to the left, title centered or left-aligned below.
+     - Make the title large (≈ 2rem) and friendly.
+
+   - `.math-home__back`:
+     - Touch-friendly button, minimum height ≈ 44–48px.
+     - Low visual weight (e.g., ghost button style) so the main tile is still the focus.
+
+   - `.math-home__content`:
+     - Centered layout for the Flashcards tile.
+     - On wider screens, keep the tile relatively constrained so it doesn’t stretch too wide.
+
+   - `.math-home__tile`:
+     - Very similar styling to `.root-home__tile`:
+       - Large clickable area, rounded corners, drop shadow, smooth hover/active states.
+       - Column layout with label + subtitle.
+     - `.math-home__tile--flashcards`:
+       - Consider a math-themed accent color (teal/green) consistent with RootHome’s math tile.
+
+2. Ensure:
+   - It looks good and readable on:
+     - iPad portrait (primary target).
+     - iPad landscape.
+     - Desktop browser.
+
+3. Optionally, apply subtle visual hinting:
+   - For example, add small decorative elements (numbers or symbols) in CSS pseudo-elements or background.
+
+---
+
+### Step 7: Basic QA for Task 2
+
+1. Run the dev server and verify the full flow:
+
+   - App loads → Root Home Page.
+   - Tap **Math** → Math Home Page appears with:
+     - Back button to Main Menu.
+     - Single “Flashcards” tile.
+   - Tap **Flashcards** → Math flashcards game starts.
+   - Tap the back button in the flashcards header → returns to Math Home Page.
+   - Tap Main Menu back button → returns to Root Home Page.
+
+2. Confirm that:
+   - There are no remaining direct links to the flashcards game from the Root Home or old menus.
+   - There are no dead routes or console errors related to removed links.
+
+3. Test on iPad (if possible) and desktop:
+   - Ensure tapping works smoothly with touch.
+   - Ensure layout doesn’t break in landscape.
+
+4. Once confirmed, commit with a clear message, e.g.:
+   - `feat: add math home page and wire flashcards entry`
+
+---
+
+### 3.2. Outputs of Task 2
+
+By the end of Task 2, we should have:
+
+- A **Math Home Page** reachable from the Root Home Page, with a clear “Flashcards” tile and a back-to-main-menu button.
+- A navigation path that cleanly routes **Math Home → Math Flashcards → Math Home**, with no “mystery” entry points.
+- All math content feels separated from spelling content, setting the stage for adding more math games later under the same Math home page.
